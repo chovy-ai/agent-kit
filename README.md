@@ -29,6 +29,23 @@ npm start -- --prompt "调用 agent_kit_status 检查框架是否可用"
 
 该模式使用 Pi 已配置的模型和凭据，会发出真实模型请求。工具白名单按 Go 握手能力注册，包含环境查询、基本文件操作与 Bash。自动测试通过真实 Pi 工具循环和 Go Runner 验证状态、写文件与命令执行，模型输出使用离线测试替身。
 
+## 在 SDK 中统一启动 Pi 与 Go
+
+模型与认证沿用 Pi 配置。应用可以通过一个入口创建 Pi 会话和 Go SDK 执行底座：
+
+```ts
+import { createPiAgent } from "agent-kit";
+
+const app = await createPiAgent();
+try {
+  await app.session.prompt("列出 local 环境中的当前目录");
+} finally {
+  await app.close();
+}
+```
+
+Go 未就绪时不创建 Pi 会话；会话创建失败会释放 Runner。分步嵌入可以使用 `createAgentKit()` 和 `app.createSession()`，会话与连接同属应用 Scope。
+
 ## 使用 Effect 服务
 
 以下代码在已经构建框架的项目中运行：
@@ -49,7 +66,7 @@ try {
 }
 ```
 
-可以向 `createAgentKit` 的第二个参数提供替代的客户端 Layer，用于测试或后续接入其他传输实现。每个应用复用一个 ManagedRuntime，Scope 关闭时清理共享 Go 进程。每次请求中断会发送取消消息并等待 Go 请求终态，不关闭正常的共享连接。
+可以向 `createAgentKit` 的第二个参数提供替代的客户端 Layer，第三个参数提供 environment / filesystem / process / sessionFactory 替换 Layer。每个应用复用一个 ManagedRuntime，Scope 关闭时清理共享 Go 进程。每次请求中断会发送取消消息并等待 Go 请求终态，不关闭正常的共享连接。
 
 `createAgentKit` 可配置 `runnerPath`、`args`、`requestTimeoutMs`、`shutdownTimeoutMs`、`maxMessageBytes` 和 `maxPendingRequests`。默认请求超时 5 秒、关闭等待 2 秒、消息上限 1 MiB、最多 64 个活动普通请求。运行器路径也可通过 `AGENT_KIT_RUNNER` 或 CLI 的 `--runner` 指定。
 
@@ -60,14 +77,17 @@ Go Runner 默认允许 32 个普通并发请求，可用 `--max-concurrent` 和 
 ```text
 agent-kit/
 ├── src/
-│   ├── main.ts                 # 启动入口和 Pi 会话入口
-│   ├── bootstrap.ts            # Effect ManagedRuntime 装配
-│   ├── runtime-client.ts       # 服务契约与 Effect 标识
-│   ├── stdio-client.ts         # stdio Layer、通信与生命周期
-│   ├── client.ts               # 旧入口的兼容重导出
-│   ├── protocol.ts             # 框架协议类型和错误
-│   ├── pi.ts                   # Pi 状态、环境、文件与命令工具
-│   └── index.ts
+│   ├── main.ts                 # CLI 入口
+│   ├── bootstrap/             # 统一启动与 Effect Layer 装配
+│   ├── modules/
+│   │   ├── go-bridge/         # Go 进程、stdio 与协议
+│   │   ├── environment/       # 环境服务与工具
+│   │   ├── filesystem/        # 文件服务与工具
+│   │   ├── process/           # 命令服务与工具
+│   │   └── agent/             # Pi 会话与工具装配
+│   ├── tooling/               # 共享工具边界与结果展示
+│   ├── index.ts               # SDK 公开入口
+│   └── *.ts                   # 保留的旧入口兼容导出
 ├── go/
 │   ├── go.mod
 │   ├── go.sum
@@ -88,7 +108,7 @@ agent-kit/
 └── prototypes/typescript/      # 保留的旧执行器原型
 ```
 
-当前一个 TypeScript 包、一个 Go module。目录按初始化职责组织，后续业务模块不在本阶段冻结。Go module 暂使用本地路径 `agent-kit`，发布时再确定正式 module 路径。
+当前一个 TypeScript 包、一个 Go module。TS 能力按领域组织，服务通过 Effect 契约对接，由应用启动层装配。Go module 暂使用本地路径 `agent-kit`，发布时再确定正式 module 路径。
 
 ## 开发与验证
 
@@ -108,6 +128,7 @@ npm run check
 
 - [架构规范入口](docs/architecture/standards.md)：领域边界、依赖方向与变更验收。
 - [模块依赖与装配](docs/architecture/module-dependencies.md)：当前接口、Wire / Effect、兼容入口与依赖验证。
+- [TS 模块与统一启动](docs/architecture/typescript-modules.md)：五个模块、Pi / Go 生命周期、能力服务与替换 Layer。
 - [执行环境使用与验证](docs/development/execution.md)：本地、远端、Pi 工具和 Go SDK。
 - [Agent 上下文索引](docs/context/index.md)：按任务定位相关说明、代码与测试。
 - [上下文渐进式披露](docs/architecture/context-disclosure.md)：常驻入口与按需读取规则。
