@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package agentkit.remote.v1;
+
+import "channel.proto";
+
+message ExecRequest {
+  string target_id = 1;
+  string execution_id = 2;
+  string command = 3;
+  string cwd = 4;
+  map<string, string> env = 5;
+  // 0 使用 GetInfo 返回的命令默认预算。
+  uint32 timeout_ms = 6;
+  // 0 使用默认捕获额度；与转发额度分别计算。
+  uint64 max_output_bytes = 7;
+}
+
+message ProcessStarted {
+  string execution_id = 1;
+}
+
+message ProcessOutput {
+  string execution_id = 1;
+  OutputStream stream = 2;
+  bytes data = 3;
+}
+
+enum OutputStream {
+  OUTPUT_STREAM_UNSPECIFIED = 0;
+  OUTPUT_STREAM_STDOUT = 1;
+  OUTPUT_STREAM_STDERR = 2;
+}
+
+// 唯一的 Exec 成功分支响应体；允许包含执行错误及部分结果。
+message ExecTerminal {
+  string execution_id = 1;
+  ProcessCompletion completion = 2;
+  optional int64 exit_code = 3;
+  string signal = 4;
+  uint64 duration_ms = 5;
+  bool output_truncated = 6;
+  bool output_incomplete = 7;
+  RpcError execution_error = 8;
+}
+
+enum ProcessCompletion {
+  PROCESS_COMPLETION_UNSPECIFIED = 0;
+  PROCESS_COMPLETION_NOT_STARTED = 1;
+  PROCESS_COMPLETION_FINISHED = 2;
+  PROCESS_COMPLETION_UNCONFIRMED = 3;
+}
+
+message ProcessCancelRequest {
+  string target_id = 1;
+  string execution_id = 2;
+}
+
+message ProcessCancelResponse {
+  string execution_id = 1;
+  ProcessCancelDisposition disposition = 2;
+}
+
+enum ProcessCancelDisposition {
+  PROCESS_CANCEL_DISPOSITION_UNSPECIFIED = 0;
+  PROCESS_CANCEL_DISPOSITION_ACCEPTED = 1;
+  PROCESS_CANCEL_DISPOSITION_ALREADY_TERMINAL = 2;
+  PROCESS_CANCEL_DISPOSITION_MISSING = 3;
+}
+
+message ProcessGetStateRequest {
+  string target_id = 1;
+  string execution_id = 2;
+}
+
+message ProcessGetStateResponse {
+  string execution_id = 1;
+  ProcessState state = 2;
+  // 仅确认未启动或确认结束时提供；不携带输出重放。
+  ExecTerminal terminal = 3;
+}
+
+enum ProcessState {
+  PROCESS_STATE_UNSPECIFIED = 0;
+  PROCESS_STATE_REGISTERING = 1;
+  PROCESS_STATE_STARTING = 2;
+  PROCESS_STATE_RUNNING = 3;
+  PROCESS_STATE_CLEANING = 4;
+  PROCESS_STATE_NOT_STARTED = 5;
+  PROCESS_STATE_FINISHED = 6;
+  PROCESS_STATE_MISSING = 7;
+}
+
+message ProcessErrorDetail {
+  string reason = 1;
+  ProcessCompletion completion = 2;
+}
+
+message ProcessLimits {
+  uint32 default_timeout_ms = 1;
+  uint32 max_timeout_ms = 2;
+  uint32 cleanup_grace_ms = 3;
+  uint64 default_capture_bytes = 4;
+  uint64 max_capture_bytes = 5;
+  uint32 max_output_chunk_bytes = 6;
+  uint64 max_forward_bytes = 7;
+  uint32 max_active_session_executions = 8;
+  uint32 max_active_global_executions = 9;
+  uint64 execution_output_queue_bytes = 10;
+  uint32 execution_output_queue_messages = 11;
+  uint32 terminal_retention_ms = 12;
+  uint32 admission_lease_ttl_ms = 13;
+  uint32 max_execution_records = 14;
+  uint32 max_cancel_marker_records = 15;
+  uint32 lease_refresh_margin_ms = 16;
+  uint32 max_command_bytes = 17;
+  uint32 max_env_entries = 18;
+  uint32 max_env_total_bytes = 19;
+  uint32 max_cwd_bytes = 20;
+  uint32 max_admission_leases = 21;
+}

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package agentkit.remote.v1;
+
+import "channel.proto";
+import "filesystem.proto";
+import "process.proto";
+
+message HelloRequest {
+  uint32 protocol_version = 1;
+}
+
+message HelloResponse {
+  uint32 protocol_version = 1;
+  string service_instance = 2;
+  // 只标识当前物理连接，不是账号、凭证或恢复令牌。
+  string session_id = 3;
+  repeated string methods = 4;
+  ChannelLimits channel_limits = 5;
+  TimeoutDefaults timeouts = 6;
+}
+
+message GetInfoRequest {
+  string target_id = 1;
+}
+
+message GetInfoResponse {
+  string target_id = 1;
+  Platform platform = 2;
+  string default_cwd = 3;
+  bool filesystem_available = 4;
+  bool bash_available = 5;
+  FilesystemLimits filesystem_limits = 6;
+  ProcessLimits process_limits = 7;
+  AdmissionLease admission_lease = 8;
+  repeated string methods = 9;
+}
+
+enum Platform {
+  PLATFORM_UNSPECIFIED = 0;
+  PLATFORM_WINDOWS = 1;
+  PLATFORM_LINUX = 2;
+  PLATFORM_MACOS = 3;
+}
+
+message AdmissionLease {
+  // 服务端内存租约的随机引用；不用于认证或权限控制。
+  bytes token = 1;
+  uint32 remaining_ttl_ms = 2;
+}

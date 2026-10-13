@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package agentkit.remote.v1;
+
+// v1 首版消息草案；WS 消息协议，不定义 gRPC service。
+message Envelope {
+  string request_id = 1;
+  uint64 sequence = 2;
+  oneof kind {
+    RpcRequest request = 10;
+    RpcResponse response = 11;
+    RpcEvent event = 12;
+  }
+}
+
+message RpcRequest {
+  string method = 1;
+  uint32 timeout_ms = 2;
+  string service_instance = 3;
+  bytes body = 4;
+  // 接纳窗口的引用，不用于身份认证。
+  bytes admission_lease = 5;
+}
+
+message RpcResponse {
+  oneof outcome {
+    bytes body = 1;
+    RpcError error = 2;
+  }
+}
+
+message RpcEvent {
+  string name = 1;
+  bytes body = 2;
+}
+
+message RpcError {
+  string code = 1;
+  string message = 2;
+  // 根据原 method 解码对应的错误详情类型。
+  bytes details = 3;
+}
+
+message RequestErrorDetail {
+  string reason = 1;
+}
+
+message CancelRequest {
+  string request_id = 1;
+}
+
+message CancelRequestResponse {
+  bool accepted = 1;
+}
+
+message ChannelLimits {
+  uint32 max_message_bytes = 1;
+  uint32 max_pending_requests = 2;
+  uint32 max_control_requests = 3;
+  uint64 max_write_queue_bytes = 4;
+  uint32 max_write_queue_messages = 5;
+  uint64 control_queue_bytes = 6;
+  uint32 control_queue_messages = 7;
+  uint32 max_sessions = 8;
+  uint32 max_active_requests = 9;
+  uint32 max_active_control_requests = 10;
+}
+
+// 数值默认值在同目录 README.md 中定义；这里传递有效策略。
+message TimeoutDefaults {
+  uint32 sdk_init_ms = 1;
+  uint32 ws_connect_ms = 2;
+  uint32 hello_ms = 3;
+  uint32 get_info_ms = 4;
+  uint32 file_rpc_ms = 5;
+  uint32 control_rpc_ms = 6;
+  uint32 heartbeat_interval_ms = 7;
+  uint32 pong_wait_ms = 8;
+  uint32 write_io_ms = 9;
+  uint32 exec_delivery_grace_ms = 10;
+  uint32 close_grace_ms = 11;
+  uint32 max_file_rpc_ms = 12;
+  uint32 max_control_rpc_ms = 13;
+}
