@@ -8,10 +8,12 @@
 | 领域边界 | 新增能力、拆分职责或改变依赖与公开接口 | [规范入口](../architecture/standards.md)、[领域规范](../architecture/domain-boundaries.md) | 按新能力确定所属代码与测试，当前不预设模块 |
 | 上下文披露 | 修改指令、文档路由、检索、读取或摘要 | [披露规范](../architecture/context-disclosure.md) | [仓库指令](../../AGENTS.md)、本索引；运行时读取工具尚未实现 |
 | 当前模块依赖 | 核对 Directory / Target / RuntimeClient 契约、具体实现装配与兼容入口 | [模块依赖与装配](../architecture/module-dependencies.md) | [Go 导入检查](../../go/internal/architecture/dependencies_test.go)、[TS 导入检查](../../test/architecture.test.ts)、[Server 替换测试](../../go/remote/target_test.go) |
-| TS 依赖与资源 | 修改 Effect Layer、应用 Scope 或客户端获取释放 | [模块依赖与装配](../architecture/module-dependencies.md)、[架构设计](../architecture/overview.md) 中的 Effect 约定 | [服务契约](../../src/runtime-client.ts)、[stdio 适配器](../../src/stdio-client.ts)、[bootstrap.ts](../../src/bootstrap.ts)、[bootstrap 测试](../../test/bootstrap.test.ts) |
+| TS 依赖与资源 | 修改模块服务、Layer、Scope、Pi 创建或桥接释放 | [TS 模块说明](../architecture/typescript-modules.md) | [启动装配](../../src/bootstrap/layers.ts)、[Bridge](../../src/modules/go-bridge/)、[模块测试](../../test/modules.test.ts) |
+| TS 能力模块 | 修改环境、文件、命令服务与对应 Pi 工具；领域服务通过公开契约交互 | [环境模块](../../src/modules/environment/README.md)、[文件模块](../../src/modules/filesystem/README.md)、[命令模块](../../src/modules/process/README.md) | [TS 模块测试](../../test/modules.test.ts)、[导入检查](../../test/architecture.test.ts) |
+| Pi 会话所有权 | 修改会话工厂、统一启动、取消或关闭竞态 | [Agent 模块](../../src/modules/agent/README.md) | [应用](../../src/bootstrap/application.ts)、[Agent Live](../../src/modules/agent/live.ts)、[真实 Pi 测试](../../test/pi.test.ts) |
 | Go 启动装配 | 修改 provider、injector 或 Wire 生成 | [架构设计](../architecture/overview.md) 中的 Wire 约定 | [DI 入口](../../go/internal/di/)、[统一检查](../../scripts/check.sh) |
-| 通信与请求生命周期 | 修改消息、并发关联、超时、取消或关闭 | [框架协议 v1](../../protocol/README.md) | [TS 协议](../../src/protocol.ts)、[stdio 客户端](../../src/stdio-client.ts)、[Go Runner](../../go/internal/runner/)、[跨语言测试](../../test/bootstrap.test.ts) |
-| Pi 集成 | 修改工具定义、白名单或 Pi / Effect 边界 | [项目入口](../../README.md) 中的 Pi 用法 | [pi.ts](../../src/pi.ts)、[main.ts](../../src/main.ts)、[Pi 集成测试](../../test/pi.test.ts) |
+| 通信与请求生命周期 | 修改消息、并发关联、超时、取消或关闭 | [框架协议 v1](../../protocol/README.md) | [TS 协议](../../src/protocol.ts)、[stdio 客户端](../../src/modules/go-bridge/live.ts)、[Go Runner](../../go/internal/runner/)、[跨语言测试](../../test/bootstrap.test.ts) |
+| Pi 集成 | 修改工具定义、白名单或 Pi / Effect 边界 | [项目入口](../../README.md) 中的 Pi 用法 | [工具装配](../../src/modules/agent/tools.ts)、[main.ts](../../src/main.ts)、[Pi 集成测试](../../test/pi.test.ts) |
 | 环境管理与能力接口 | Manager 管理 Environment，返回同一目标的 Filesystem / Process；修改公开接口与所有权时读取 | [环境设计](../architecture/environments.md)、[领域规范](../architecture/domain-boundaries.md) | [公开 Go 契约](../../go/environment/environment.go)、[Local](../../go/environment/local/)、[Remote](../../go/remote/) |
 | 远端传输决策与实施 | 核对共享 WS、RPC 职责与兼容接入；代码已实现，更多平台实测仍待完成 | [传输决策](../architecture/remote-transport.md) | [使用与验证](../development/execution.md)、[stdio](../../protocol/README.md) |
 | 远端 WS 通道 | 修改 SDK Dial、Server Accept / Session、握手、取消、心跳、队列或断线时读取 | [WS 通道](../../protocol/remote-channel.md) | [Client](../../go/remote/client.go)、[Server](../../go/remote/server.go)、[channel](../../go/remote/channel.go) |

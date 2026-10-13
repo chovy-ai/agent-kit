@@ -7,7 +7,12 @@
   "engines": { "node": ">=22.19.0" },
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./pi": { "types": "./dist/pi.d.ts", "import": "./dist/pi.js" }
+    "./pi": { "types": "./dist/pi.d.ts", "import": "./dist/pi.js" },
+    "./go-bridge": { "types": "./dist/modules/go-bridge/index.d.ts", "import": "./dist/modules/go-bridge/index.js" },
+    "./environment": { "types": "./dist/modules/environment/index.d.ts", "import": "./dist/modules/environment/index.js" },
+    "./filesystem": { "types": "./dist/modules/filesystem/index.d.ts", "import": "./dist/modules/filesystem/index.js" },
+    "./process": { "types": "./dist/modules/process/index.d.ts", "import": "./dist/modules/process/index.js" },
+    "./agent": { "types": "./dist/modules/agent/index.d.ts", "import": "./dist/modules/agent/index.js" }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createAgentSession, DefaultResourceLoader, ModelRuntime, SessionManager, SettingsManager } from "@earendil-works/pi-coding-agent";
+import { DefaultResourceLoader, ModelRuntime, SessionManager, SettingsManager } from "@earendil-works/pi-coding-agent";
 import { createAssistantMessageEventStream } from "@earendil-works/pi-ai";
 import type { AssistantMessage, Model } from "@earendil-works/pi-ai";
 import { createAgentKit } from "../src/bootstrap.js";
@@ -33,11 +33,10 @@ test("real Pi SDK uses Effect-backed status, file and Bash tools", async (t) => 
     reasoning: false, input: ["text"], contextWindow: 100000, maxTokens: 1000,
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
   };
-  const { session } = await createAgentSession({
+  const { session } = await app.createSession({
     cwd, agentDir, model, modelRuntime, settingsManager, resourceLoader,
-    sessionManager: SessionManager.inMemory(cwd), customTools: app.tools, tools: app.tools.map((tool) => tool.name),
+    sessionManager: SessionManager.inMemory(cwd),
   });
-  t.after(() => session.dispose());
   assert.deepEqual(session.getActiveToolNames(), app.tools.map((tool) => tool.name));
   assert.ok(session.getActiveToolNames().includes("process_exec"));
   let calls = 0;

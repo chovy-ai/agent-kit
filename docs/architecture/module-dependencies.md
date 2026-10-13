@@ -9,7 +9,8 @@
 | Go Runner | `environment.Directory`，只提供 Get / IDs | `environment.Manager` | Wire 启动入口 |
 | 文件与命令调用 | `Environment`、`Filesystem`、`Process` | Local / Remote | Manager 注册与查找 |
 | 远端 Server | `remote.Target`，包含环境能力、平台描述、执行通知与关闭 | Local 或独立后端 | Wire 或 Go 应用构造函数 |
-| Pi 工具 | `RuntimeClientService` 与 Effect 服务标识 | stdio 客户端或替换 Layer | `bootstrap.ts` |
+| Pi 业务工具 | EnvironmentService / FilesystemService / ProcessService | 能力 Live Layer 或替换 Layer | `bootstrap/layers.ts` |
+| TS 能力适配器 | RuntimeClientService | stdio 客户端或替换 Layer | 应用启动入口 |
 
 接口、参数、结果与错误类型属于公开契约。业务消费方不构造具体适配器，不取出其内部执行对象。启动装配层选择实现，可以导入具体构造函数。
 
@@ -22,7 +23,8 @@ flowchart LR
     Remote["Remote 实现"] -.-> Environment
     Server["远端 Server"] --> Target["Target 接口"]
     Local -.-> Target
-    Pi["Pi 工具"] --> Client["RuntimeClient 服务契约"]
+    Pi["Pi 工具"] --> Services["环境 / 文件 / 进程服务契约"]
+    Services --> Client["RuntimeClient 服务契约"]
     Stdio["stdio Layer"] -.-> Client
     Boot["Wire / Effect 启动装配"] --> Manager
     Boot --> Local
@@ -68,9 +70,9 @@ Local 内部使用 `internal/execution`，Remote 内部使用生成消息与 WS 
 
 ## TS 的完整边界与兼容方式
 
-完整方案分开契约、适配器与装配：[runtime-client.ts](../../src/runtime-client.ts) 声明接口和 Effect 标识；[stdio-client.ts](../../src/stdio-client.ts) 实现 Layer / Scope；[pi.ts](../../src/pi.ts) 只获取服务；[bootstrap.ts](../../src/bootstrap.ts) 选择默认 Layer，也接受替换 Layer。
+TS 已按 go-bridge、environment、filesystem、process、agent 五个模块落地。工具调用各自能力服务，Live Layer 借用 RuntimeClient。跨模块通过 index.ts 契约，工具装配入口可选择公开 tools.ts 适配器；bootstrap 组合实现。详细源码、统一启动与资源限制见 [TS 模块说明](typescript-modules.md)。
 
-兼容方式保留 [client.ts](../../src/client.ts) 为旧入口的重导出，原包入口继续导出相同标识和构造函数。业务消费方使用契约入口；旧调用方可以逐步迁移。Go 的 Filesystem / Process 和 RPC 字段保持原有语义，Server 构造改为接收 `map[string]remote.Target`。
+兼容入口保留 client.ts、runtime-client.ts、stdio-client.ts、protocol.ts、bootstrap.ts 和 pi.ts 的原导出；服务标识、工具名与 RPC 字段保持兼容。旧 createFrameworkTools 借用原有桥接运行时，现代应用构造一个完整服务图。
 
 ## 验证与扩展
 
@@ -82,7 +84,7 @@ Local 内部使用 `internal/execution`，Remote 内部使用生成消息与 WS 
 | [TS 导入规则](../../test/architecture.test.ts) | 字面量 import / export / require 遵守入口规则；Pi 与契约不能导入 stdio；兼容导出保持标识一致 |
 | [Runner 替换测试](../../go/internal/runner/business_test.go) | 独立 Directory / Filesystem 能接入，无需具体 Manager |
 | [Server 替换测试](../../go/remote/target_test.go) | 独立 Target 通过真实 WS 提供文件与执行，正确处理元数据、通知与关闭 |
-| [Effect 替换测试](../../test/bootstrap.test.ts) | 自定义 Layer 提供客户端并通过 Scope 释放资源 |
+| [Effect 替换测试](../../test/bootstrap.test.ts)、[TS 模块测试](../../test/modules.test.ts) | 替换能力服务、共享单个桥接进程、创建失败及会话 / 连接释放 |
 | [Wire provider 测试](../../go/internal/di/wire_test.go) | 初始化错误传递、清理后环境关闭与重复清理安全 |
 
 导入检查不是完整语义分析；TS 不覆盖运行时拼接模块名。编译与替换测试共同验证构造边界。新增模块或改变依赖时，同步更新规则和说明，不能仅修改检查以放行未经设计的依赖。

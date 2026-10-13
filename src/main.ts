@@ -1,9 +1,8 @@
 import { parseArgs } from "node:util";
-import { createAgentSession, SessionManager } from "@earendil-works/pi-coding-agent";
-import type { AgentSession } from "@earendil-works/pi-coding-agent";
+import type { AgentSession } from "./modules/agent/index.js";
 import { Effect } from "effect";
 import { createAgentKit } from "./bootstrap.js";
-import { RuntimeClient } from "./runtime-client.js";
+import { RuntimeClient } from "./modules/go-bridge/index.js";
 
 const { values } = parseArgs({ options: { runner: { type: "string" }, prompt: { type: "string" }, "remote-endpoint": { type: "string" }, "remote-target": { type: "string" }, cwd: { type: "string" }, bash: { type: "string" } } });
 let app: Awaited<ReturnType<typeof createAgentKit>> | undefined;
@@ -11,7 +10,6 @@ let session: AgentSession | undefined;
 let stopping = false;
 const stop = () => {
   stopping = true;
-  void session?.abort().catch(() => {});
   void app?.close().catch(() => {});
 };
 process.once("SIGINT", stop);
@@ -22,9 +20,7 @@ try {
   app = await createAgentKit({ ...(values.runner === undefined ? {} : { runnerPath: values.runner }), args });
   if (stopping) await app.close();
   else if (values.prompt !== undefined) {
-    ({ session } = await createAgentSession({
-      customTools: app.tools, tools: app.tools.map((tool) => tool.name), sessionManager: SessionManager.inMemory(),
-    }));
+    ({ session } = await app.createSession(values.cwd === undefined ? {} : { cwd: values.cwd }));
     if (!stopping) await session.prompt(values.prompt);
     console.log(session.getLastAssistantText() ?? "");
   } else {
@@ -40,8 +36,8 @@ try {
     process.exitCode = 1;
   }
 } finally {
-  session?.dispose();
-  await app?.close();
+  try { await app?.close(); }
+  catch (error) { console.error(error instanceof Error ? error.message : String(error)); process.exitCode = 1; }
   process.removeListener("SIGINT", stop);
   process.removeListener("SIGTERM", stop);
 }

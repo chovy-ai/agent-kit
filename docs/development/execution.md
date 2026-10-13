@@ -57,6 +57,8 @@ Pi 的工具按 Runner 声明的能力注册：
 
 每次文件和命令调用都填写 environmentId。路径属于所选目标；复制、移动、删除与搜索等复杂操作通过该环境的 Bash 执行。未知环境失败，不改选目标。
 
+TS SDK 可以通过 createPiAgent 统一创建 Pi 和 Go，或用 createAgentKit 与 app.createSession 分步嵌入；生命周期与模块替换见 [TS 模块说明](../architecture/typescript-modules.md)。
+
 Process 的 stdout / stderr 通过事件传输，stdio 终态只携带完成摘要；TS 在受限缓冲中重建 base64 字节结果，Pi 再展示文本。非零退出是已完成的执行结果，Pi 将其标记为工具失败。取消确认不表示文件变更回滚。
 
 ## 直接使用 Go SDK
@@ -101,7 +103,7 @@ Client 是物理连接的所有者，Environment 借用它；先关闭环境再�
 | 共享通道与两端 RPC | [Client](../../go/remote/client.go)、[Server](../../go/remote/server.go)、[channel](../../go/remote/channel.go) |
 | 消息生成 | [四份消息源](../../protocol/remote/v1/README.md)、[生成脚本](../../scripts/generate-protocol.sh) |
 | 启动装配 | [Wire injector](../../go/internal/di/wire.go)、[远端入口](../../go/cmd/remote-server/main.go) |
-| Pi 与跨语言边界 | [Pi 工具](../../src/pi.ts)、[服务契约](../../src/runtime-client.ts)、[stdio 适配器](../../src/stdio-client.ts)、[Runner 业务分发](../../go/internal/runner/business.go) |
+| Pi 与跨语言边界 | [工具装配](../../src/modules/agent/tools.ts)、[能力模块](../architecture/typescript-modules.md)、[stdio 适配器](../../src/modules/go-bridge/live.ts)、[Runner 业务分发](../../go/internal/runner/business.go) |
 | 接口替换与依赖规则 | [模块依赖与装配](../architecture/module-dependencies.md)、[后端替换测试](../../go/remote/target_test.go)、[Go 导入检查](../../go/internal/architecture/dependencies_test.go)、[TS 导入检查](../../test/architecture.test.ts) |
 | 行为证据 | [Go 两进程测试](../../go/remote/integration_test.go)、[本地测试](../../go/environment/local/local_test.go)、[stdio 远端测试](../../test/execution.test.ts)、[Pi 工具循环](../../test/pi.test.ts) |
 

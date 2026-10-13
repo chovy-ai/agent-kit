@@ -11,6 +11,7 @@
 | 修改通信消息、版本、请求取消或关闭 | [已实现的框架协议](../../protocol/README.md) |
 | 核对框架分工、Effect / Wire 装配或目标架构 | [架构设计](overview.md) |
 | 核对当前接口、构造依赖、兼容入口或依赖检查 | [模块依赖与装配](module-dependencies.md) |
+| 修改 TS 模块、Layer、Pi 会话或统一启动 | [TS 模块与统一启动](typescript-modules.md) |
 
 ## 统一原则
 

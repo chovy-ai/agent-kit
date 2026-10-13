@@ -73,7 +73,7 @@ Go 保留普通构造函数，Wire 在启动入口选择并组装实现。运行
 
 ## 当前框架的兼容范围
 
-当前 TS 契约在 `src/runtime-client.ts`，stdio 适配器在 `src/stdio-client.ts`；`src/client.ts` 只保留兼容重导出。Go Runner 依赖 Directory，远端 Server 依赖 Target，具体实例由启动入口装配。实现与验证入口见 [模块依赖与装配](module-dependencies.md)。
+当前 TS 正式模块位于 `src/modules/`，能力服务、Live Layer 与工具适配器各有职责；根目录旧入口保留兼容导出。模块契约与统一生命周期见 [TS 模块说明](typescript-modules.md)。Go Runner 依赖 Directory，远端 Server 依赖 Target，具体实例由启动入口装配。实现与验证入口见 [模块依赖与装配](module-dependencies.md)。
 
 Go Runner 仍集中处理诊断与 stdio 通信；适配器内部可以依赖自己的执行内核或协议转换。这不授权跨领域消费方依赖具体适配器。后续新增独立领域能力时，声明契约与依赖规则，沿用公开入口和测试验证兼容性。
 
