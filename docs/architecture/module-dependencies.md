@@ -11,6 +11,7 @@
 | 远端 Server | `remote.Target`，包含环境能力、平台描述、执行通知与关闭 | Local 或独立后端 | Wire 或 Go 应用构造函数 |
 | Pi 业务工具 | EnvironmentService / FilesystemService / ProcessService | 能力 Live Layer 或替换 Layer | `bootstrap/layers.ts` |
 | TS 能力适配器 | RuntimeClientService | stdio 客户端或替换 Layer | 应用启动入口 |
+| Pi 网页 / 扩展宿主 | `createAgentKit`、RunnerOptions、Pi ExtensionAPI | 包内 extension | `integrations/pi-extension.ts`，每个扩展运行时拥有一个应用 |
 
 接口、参数、结果与错误类型属于公开契约。业务消费方不构造具体适配器，不取出其内部执行对象。启动装配层选择实现，可以导入具体构造函数。
 

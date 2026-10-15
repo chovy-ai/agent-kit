@@ -22,6 +22,7 @@ const legacy: Record<string, readonly string[]> = {
   "protocol.ts": ["modules/go-bridge/protocol.ts"],
   "pi.ts": ["modules/go-bridge/index.ts", "modules/agent/index.ts", "tooling/index.ts", "bootstrap/layers.ts"],
   "main.ts": ["bootstrap.ts", "modules/agent/index.ts", "modules/go-bridge/index.ts"],
+  "integrations/pi-extension.ts": ["bootstrap.ts", "modules/go-bridge/index.ts"],
 };
 
 function allowedDependency(file: string, target: string): boolean {
@@ -44,7 +45,7 @@ function allowedDependency(file: string, target: string): boolean {
 function allowedExternal(file: string, specifier: string): boolean {
   if (specifier === "effect") return true;
   if (specifier === "typebox") return file.endsWith("/tools.ts") || file === "modules/agent/diagnostics.ts" || file === "tooling/schema.ts";
-  if (specifier === "@earendil-works/pi-coding-agent") return file.startsWith("modules/agent/") || file.endsWith("/tools.ts");
+  if (specifier === "@earendil-works/pi-coding-agent") return file.startsWith("modules/agent/") || file.endsWith("/tools.ts") || file === "integrations/pi-extension.ts";
   if (specifier === "node:util") return file === "main.ts";
   if (file === "modules/go-bridge/runner.ts") return ["node:fs", "node:url"].includes(specifier);
   return file === "modules/go-bridge/live.ts" && ["node:child_process", "node:crypto"].includes(specifier);

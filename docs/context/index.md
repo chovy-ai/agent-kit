@@ -5,6 +5,8 @@
 | 任务或主题 | 摘要与读取触发条件 | 首选说明 | 源码与验证入口 |
 | --- | --- | --- | --- |
 | 启动与当前能力 | 查看框架如何启动，核对已实现能力或原型状态 | [项目入口](../../README.md) | [main.ts](../../src/main.ts)、[bootstrap 测试](../../test/bootstrap.test.ts) |
+| 聊天页面与 Pi extension | 修改对话框、消息与执行展示、网页启动、模型配置和扩展生命周期 | [聊天指南](../development/web-chat.md) | [前端](../../web/src/App.tsx)、[状态适配](../../web/src/state.ts)、[恢复](../../web/src/session.ts)、[启动器](../../scripts/start-web.mjs)、[扩展](../../src/integrations/pi-extension.ts)、[专项测试](../../test/chat-state.test.ts) |
+| 对话界面边界 | 修改浏览器状态、连接资源归属、历史恢复时序或兼容入口 | [对话架构](../architecture/chat-interface.md) | [连接](../../web/src/connection.ts)、[恢复测试](../../test/chat-state.test.ts) |
 | 领域边界 | 新增能力、拆分职责或改变依赖与公开接口 | [规范入口](../architecture/standards.md)、[领域规范](../architecture/domain-boundaries.md) | 当前模块与源码见模块依赖条目，新能力按职责新增 |
 | 上下文披露 | 修改指令、文档路由、检索、读取或摘要 | [披露规范](../architecture/context-disclosure.md) | [仓库指令](../../AGENTS.md)、本索引；已有文件读取，专用索引展开尚未实现 |
 | 具名环境配置 | 修改名称、配置文件、路径基准与 local 类型 | [配置指南](../development/configuration.md) | [公开定义](../../go/environment/config.go)、[解析](../../go/internal/runner/config.go)、[验收](../../test/configuration.test.ts)、[本地记录](../development/local-acceptance.md) |

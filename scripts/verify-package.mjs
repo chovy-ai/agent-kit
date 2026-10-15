@@ -33,7 +33,7 @@ import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { Effect } from "effect";
 import { createAgentKit, EnvironmentService, FilesystemService, ProcessService, RuntimeClient } from "agent-kit";
-for (const name of ["agent", "environment", "filesystem", "process", "go-bridge", "pi"]) await import("agent-kit/" + name);
+for (const name of ["agent", "environment", "filesystem", "process", "go-bridge", "pi", "pi-extension"]) await import("agent-kit/" + name);
 await Promise.all([mkdir("workspace"), mkdir("scratch")]);
 const app = await createAgentKit({ environments: {
   workspace: { type: "local", cwd: join(process.cwd(), "workspace") },

@@ -26,6 +26,8 @@ try {
 
 具名环境可通过 runner.environments 或 runner.configPath 配置，当前只支持 local。规则见 [配置指南](../development/configuration.md)；包内 Runner 定位与交付见 [打包指南](../development/packaging.md)。
 
+网页宿主通过 [Pi extension](../../src/integrations/pi-extension.ts) 接入：宿主拥有 Pi 会话，扩展经 `createAgentKit` 拥有独立工具应用和 Go Runner。扩展是装配适配器，只消费公开入口；不会另建 Pi 会话。网页启动、环境和本机页面能力的边界见 [聊天指南](../development/web-chat.md)。
+
 ## 按职责找代码
 
 | 模块 | 公开契约与职责 | 实现位置 |

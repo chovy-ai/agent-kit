@@ -5,6 +5,8 @@ agent_kit_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$agent_kit_root"
 npm run typecheck
 npm run build:ts
+npm run typecheck:web
+npm run build:web
 
 agent_kit_wire_snapshot=$(mktemp)
 agent_kit_proto_snapshot=$(mktemp -d)

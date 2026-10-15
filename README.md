@@ -29,6 +29,18 @@ npm start -- --prompt "调用 agent_kit_status 检查框架是否可用"
 
 该模式使用 Pi 已配置的模型和凭据，会发出真实模型请求。工具白名单按 Go 握手能力注册，包含环境查询、基本文件操作与 Bash。自动测试通过真实 Pi 工具循环和 Go Runner 验证状态、写文件与命令执行，模型输出使用离线测试替身。
 
+## 打开聊天页面
+
+默认提供简洁的对话框，支持流式回复、可展开执行记录、停止、环境选择与历史会话。后端复用 pi-web-ui，通过 Pi extension 接入 Agent Kit 的 Go 工具。在 `.env.web.local` 配置 Sub2API 客户端 Key 后启动：
+
+```sh
+cp .env.example .env.web.local
+# 填写 AGENT_KIT_API_KEY
+npm run start:web
+```
+
+打开 <http://127.0.0.1:8787>，默认经本地 Sub2API 使用 `gpt-6.1-sol`。当前开发机已配置凭据，可以直接启动。聊天记录与配置保存在被 Git 忽略的 `.agent-kit/web`；`--ui classic` 保留上游页面。具名环境、兼容扩展入口、页面与执行环境的边界见 [聊天页面指南](docs/development/web-chat.md)。
+
 ## 在 SDK 中统一启动 Pi 与 Go
 
 模型与认证沿用 Pi 配置。应用可以通过一个入口创建 Pi 会话和 Go SDK 执行底座：
@@ -105,6 +117,7 @@ agent-kit/
 ├── src/
 │   ├── main.ts                 # CLI 入口
 │   ├── bootstrap/             # 统一启动与 Effect Layer 装配
+│   ├── integrations/          # Pi extension 宿主接入
 │   ├── modules/
 │   │   ├── go-bridge/         # Go 进程、stdio 与协议
 │   │   ├── environment/       # 环境服务与工具
@@ -129,7 +142,8 @@ agent-kit/
 │       └── architecture/       # Go 依赖边界检查
 ├── protocol/README.md
 ├── test/                       # 跨语言、Layer 替换与 Pi 集成测试
-├── scripts/check.sh
+├── scripts/                   # 构建、网页启动与验收
+├── web/                       # 对话界面、会话协议适配与连接生命周期
 ├── docs/
 └── prototypes/typescript/      # 保留的旧执行器原型
 ```
@@ -156,6 +170,7 @@ npm run check
 - [模块依赖与装配](docs/architecture/module-dependencies.md)：当前接口、Wire / Effect、兼容入口与依赖验证。
 - [TS 模块与统一启动](docs/architecture/typescript-modules.md)：五个模块、Pi / Go 生命周期、能力服务与替换 Layer。
 - [具名环境配置](docs/development/configuration.md)：配置文件、TS 对象、名称与兼容规则。
+- [聊天页面与 Pi extension](docs/development/web-chat.md)：本地网页、Sub2API、Go 工具路由与会话生命周期。
 - [打包指南](docs/development/packaging.md)：二进制矩阵、tarball、安装与本地验收。
 - [运行时上下文方案](docs/architecture/context-runtime-plan.md)：尚未实现的来源注册、索引与按需展开设计。
 - [执行环境使用与验证](docs/development/execution.md)：本地、远端、Pi 工具和 Go SDK。
