@@ -23,10 +23,18 @@ export class RuntimeClient extends Context.Service<RuntimeClient, RuntimeClientS
 export interface RunnerOptions {
   runnerPath?: string;
   args?: string[];
+  configPath?: string;
+  environments?: Record<string, LocalEnvironmentConfig>;
   requestTimeoutMs?: number;
   shutdownTimeoutMs?: number;
   maxMessageBytes?: number;
   maxPendingRequests?: number;
+}
+
+export interface LocalEnvironmentConfig {
+  type: "local";
+  cwd?: string;
+  bash?: string;
 }
 
 export class RunnerConfig extends Context.Service<RunnerConfig, RunnerOptions>()("agent-kit/RunnerConfig") {}

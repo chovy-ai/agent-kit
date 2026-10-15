@@ -26,11 +26,12 @@ func TestGeneratedInjectorValidatesConfiguration(t *testing.T) {
 func TestProviderCleanupClosesItsEnvironmentOnce(t *testing.T) {
 	config := runner.DefaultConfig()
 	config.Cwd = t.TempDir()
-	target, cleanup, err := provideLocalEnvironment(config)
+	targets, cleanup, err := provideLocalEnvironments(config)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(cleanup)
+	target := targets["local"]
 	if err = target.Filesystem().WriteFile(context.Background(), "before", []byte("data")); err != nil {
 		t.Fatal(err)
 	}

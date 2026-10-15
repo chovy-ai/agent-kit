@@ -16,7 +16,7 @@ import (
 
 func InitializeRunner(config runner.Config, streams runner.Streams) (*runner.Server, func(), error) {
 	logger := provideLogger(streams)
-	environment, cleanup, err := provideLocalEnvironment(config)
+	diLocalEnvironments, cleanup, err := provideLocalEnvironments(config)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -25,7 +25,7 @@ func InitializeRunner(config runner.Config, streams runner.Streams) (*runner.Ser
 		cleanup()
 		return nil, nil, err
 	}
-	manager, err := provideEnvironmentManager(environment, diRemoteBinding)
+	manager, err := provideEnvironmentManager(diLocalEnvironments, diRemoteBinding)
 	if err != nil {
 		cleanup2()
 		cleanup()

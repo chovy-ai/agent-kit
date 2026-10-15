@@ -135,7 +135,7 @@ Runner 依赖 Directory，Server 依赖 Target；Wire 将 Manager / Local 绑定
 
 远端执行器是独立部署的 Go 程序，远端宿主负责启动、停止和异常重启。本机连接已部署的服务，不默认负责上传二进制、启动远端进程或管理沙箱。当前已有 [Runner](../../go/cmd/runtime-runner/main.go)、[远端 Server](../../go/cmd/remote-server/main.go) 与两端 [Wire injector](../../go/internal/di/wire.go)。
 
-本次提供 v1 消息、启动租约及默认运行预算。实施时确定 WS 库、Go 生成方式与 Wire 构造装配；本版不做身份权限。Server 配置文件、参数、监听地址、TLS 部署、目标目录和 Bash 配置形式暂留后续讨论，不在本次创建配置文件。
+v1 消息、租约、WS 库、生成代码、Wire 装配和默认预算已实现。Server CLI 已支持 listen、target、cwd、bash；完整部署配置文件和 TLS 终止形式尚未提供，本版不做身份权限。具名配置本轮只覆盖 Runner 的 local 实例。
 
 完整方案增加独立远端入口并复用宿主能力、执行契约和普通构造函数。当前兼容落地保留 TS ↔ Go stdio Runner，在它后面接 Remote Environment，并按 [RPC 方案](../../protocol/process-rpc.md#stdio-接入) 扩展输出事件；不把远端服务塞进现有诊断 handler。
 
@@ -148,10 +148,10 @@ Runner 依赖 Directory，Server 依赖 Target；Wire 将 Manager / Local 绑定
 | Windows 目标原生执行器 | Bash 路径映射、非 ASCII 路径、环境变量、双流输出与 Job / 受管理进程范围清理分别实测 |
 | 在 WSL 内运行执行器 | 注册的是 WSL/Linux 目标，文件与进程都在 WSL 内处理；不能同时使用 Windows 宿主文件实现 |
 
-Windows 目标可以使用 Job Object 管理关联进程，但它约束的是目标侧执行，不是本机 RPC 调用方。当前没有 Windows 业务实现或平台实测。[Windows Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects)
+Windows 目标可以使用 Job Object 管理关联进程，但它约束的是目标侧执行，不是本机 RPC 调用方。当前 Windows 原生 Job 执行实现已存在，但尚无 Windows 实机验收。[Windows Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects)
 
 ## 验收入口
 
-实现后至少验证两个真实 Go 进程之间的文件写入与 Bash 读取、stdout/stderr 及非零退出、跨目标路由、执行前取消与启动竞态、流中断与目标清理、仍连通时的终态确认、断线立即失败且不自动重连、重启后的结果不确定，以及共享连接下关闭一个环境不会影响其他环境。
+现有集成测试覆盖两个本机 Go 进程之间的文件写入与 Bash 读取、stdout/stderr 及非零退出、跨目标路由、执行前取消与启动竞态、流中断与目标清理、仍连通时的终态确认、断线立即失败且不自动重连、重启后的结果不确定，以及共享连接下关闭一个环境不会影响其他环境。
 
 框架诊断测试继续保留；远端和命令行为由 [Go 两进程测试](../../go/remote/integration_test.go)、[跨语言远端测试](../../test/execution.test.ts) 与 [Pi 工具循环](../../test/pi.test.ts) 验证。平台覆盖范围见执行指南。

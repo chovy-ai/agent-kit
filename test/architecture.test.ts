@@ -46,7 +46,8 @@ function allowedExternal(file: string, specifier: string): boolean {
   if (specifier === "typebox") return file.endsWith("/tools.ts") || file === "modules/agent/diagnostics.ts" || file === "tooling/schema.ts";
   if (specifier === "@earendil-works/pi-coding-agent") return file.startsWith("modules/agent/") || file.endsWith("/tools.ts");
   if (specifier === "node:util") return file === "main.ts";
-  return file === "modules/go-bridge/live.ts" && ["node:child_process", "node:crypto", "node:url"].includes(specifier);
+  if (file === "modules/go-bridge/runner.ts") return ["node:fs", "node:url"].includes(specifier);
+  return file === "modules/go-bridge/live.ts" && ["node:child_process", "node:crypto"].includes(specifier);
 }
 
 test("TypeScript modules use public contracts and startup alone selects implementations", async () => {

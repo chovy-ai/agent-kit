@@ -1,4 +1,4 @@
-# 远端文件 RPC 草案
+# 远端文件 RPC 契约
 
 状态：文件 RPC 首版已实现，采用共享 WS / Protobuf。消息源见 [v1 契约](remote/v1/README.md)，实现见 [文件 Client](../go/remote/filesystem_client.go)、[文件 Server](../go/remote/filesystem_server.go) 与 [宿主文件](../go/environment/local/filesystem.go)。平台与测试范围见 [执行指南](../docs/development/execution.md)。
 
@@ -20,7 +20,7 @@ Go Remote Filesystem 持有已配置的远端 targetId，把领域操作转换�
 
 远端服务拒绝未知目标，不把它解释为默认宿主。宿主操作自身的权限错误仍保留，不引入调用者权限判断，不因失败切换环境。
 
-原草案的 filesystem.capabilities 收敛到共享的 Environment.GetInfo：输入 target_id，返回目标平台、默认目录、支持操作及服务端限制。GetInfo 与 Filesystem 方法都是设计入口，不表示已交付服务；完整的连接握手与 Process 信息见 [远端执行器方案](../docs/architecture/remote-executor.md)。文件相关信息至少包含：
+原草案的 filesystem.capabilities 收敛到共享的 Environment.GetInfo：输入 target_id，返回目标平台、默认目录、支持操作及服务端限制。GetInfo 与 Filesystem 方法均已有 Client / Server 实现；完整的连接握手与 Process 信息见 [远端执行器方案](../docs/architecture/remote-executor.md)。文件相关信息至少包含：
 
 | 信息 | 语义 |
 | --- | --- |
@@ -49,7 +49,7 @@ GetInfo 字段见 [system.proto](remote/v1/system.proto)，FilesystemLimits 见�
 | filesystem.stat | StatRequest | StatResponse |
 | filesystem.mkdir | MkdirRequest | MkdirResponse |
 
-文件业务消息已有 `.proto` 首版，依赖标准的 google.protobuf.Timestamp。Go 领域模型不依赖生成的 RPC 类型，生成位置后续确定。公共 Envelope、RpcResponse 和 RpcError 的字段以 [通道方案](remote-channel.md#消息信封) 为准。
+文件业务消息已有 `.proto` 首版，依赖标准的 google.protobuf.Timestamp。Go 领域模型不依赖生成的 RPC 类型，生成位置为 go/internal/remoteproto/v1。公共 Envelope、RpcResponse 和 RpcError 的字段以 [通道方案](remote-channel.md#消息信封) 为准。
 
 文件消息的字段唯一来源为 [filesystem.proto](remote/v1/filesystem.proto)。公共信封见 [channel.proto](remote/v1/channel.proto)，完整注册表和初始默认值见 [v1 首版契约](remote/v1/README.md)。
 
@@ -186,11 +186,11 @@ Read / ReadDir / Stat 不承诺或报告写入副作用，mutation_state 可省�
 
 远端 Go ↔ Go 使用 WS Binary Message 承载 Protobuf Envelope，body 再编码对应文件消息：文件内容为 bytes，偏移及大小保留 64 位整数，时间使用 Timestamp。Runner 向 TS 转换独立的跨语言 DTO，不要求 Go 领域类型直接使用 RPC 消息。
 
-JSON 边界明确使用 base64 表达 bytes；64 位整数采用十进制字符串，避免 TypeScript number 超过安全整数范围后丢失精度；时间采用规范化的 RFC 3339 表达。此编码约定需要在后续 stdio 文件 DTO 中落实，不表示当前框架已经支持这些字段。[ProtoJSON 编码规则](https://protobuf.dev/programming-guides/json/)
+JSON 边界明确使用 base64 表达 bytes；64 位整数采用十进制字符串，避免 TypeScript number 超过安全整数范围后丢失精度；时间采用规范化的 RFC 3339 表达。这些编码已落实在 stdio 文件 DTO 和两端转换中。[ProtoJSON 编码规则](https://protobuf.dev/programming-guides/json/)
 
 TS ↔ Go 现有 stdio 的 1 MiB 消息上限不会自动成为远端文件块上限。远端独立公布并执行读取块、写入数据、目录条目、编码消息与并发上限；SDK 整文件返回还有单独的内存预算。
 
-Runner 在两个边界都做编码后大小检查。1 MiB 原始字节经 base64 加上 DTO 字段后会超过 1 MiB stdio 消息上限，不能直接以远端原始数据上限作为 Agent 工具上限。Agent 路径采用两个边界允许的有效额度；读取块可以适配，但最终整文件响应同样须受 stdio 限制，不能仅因分段 RPC 成功就返回超限消息。原始内容默认值见 v1 契约：读取块 64 KiB、覆盖写入 1 MiB、SDK 整文件返回 8 MiB、Agent 文件读写 512 KiB；后续联调验证编码余量。各分段共享一次逻辑 ReadFile 的总调用预算，不逐块重新获得 10 秒。
+Runner 在两个边界都做编码后大小检查。1 MiB 原始字节经 base64 加上 DTO 字段后会超过 1 MiB stdio 消息上限，不能直接以远端原始数据上限作为 Agent 工具上限。Agent 路径采用两个边界允许的有效额度；读取块可以适配，但最终整文件响应同样须受 stdio 限制，不能仅因分段 RPC 成功就返回超限消息。原始内容默认值见 v1 契约：读取块 64 KiB、覆盖写入 1 MiB、SDK 整文件返回 8 MiB、Agent 文件读写 512 KiB；编码余量由跨语言边界和文件额度校验保证。各分段共享一次逻辑 ReadFile 的总调用预算，不逐块重新获得 10 秒。
 
 ## 完整解决方案与兼容范围
 
@@ -210,7 +210,7 @@ Runner 在两个边界都做编码后大小检查。1 MiB 原始字节经 base64
 
 ## 落地与验证入口
 
-文件 `.proto`、GetInfo 和默认策略已有首版，实施时落实 Go 生成与公开类型、WS 分发及 stdio 文件 DTO。第一版不做身份权限，Server 配置继续待定。当前源码已实现远端文件业务与 stdio 桥接，见 [stdio 协议](README.md) 和执行指南；示例表达实际消息格式。
+文件消息生成、GetInfo、公开类型、WS 分发及 stdio 文件 DTO 已实现。本版不做身份权限，Server 已提供基本 CLI 参数，完整部署配置与 TLS 终止尚未提供。当前远端文件业务与 stdio 桥接见 [stdio 协议](README.md) 和执行指南；示例表达实际消息格式。
 
 | 验证范围 | 应验证的结果 |
 | --- | --- |
@@ -221,4 +221,4 @@ Runner 在两个边界都做编码后大小检查。1 MiB 原始字节经 base64
 | 生命周期与错误 | 未知目标、权限、修改前取消、修改期间取消、写入响应丢失、缺失错误详情及结果未知 |
 | 资源与两个边界 | 并发请求隔离、句柄释放、目录结果超限、base64 与 64 位值、完整 stdio 消息额度 |
 
-只修改方案时核对 Markdown 链接、消息引用、方法数量及文档状态；业务测试和跨平台验证随正式实现交付，不以文档检查代替运行验证。
+只修改方案时核对 Markdown 链接、消息引用、方法数量及文档状态；业务行为已有正式测试；Windows / Linux 实机验证仍待完成，文档检查不替代运行验证。

@@ -26,7 +26,7 @@ RPC 是 WebSocket 上的应用协议。WebSocket 提供双向消息和 Ping / Po
 
 Client 侧 Go SDK 在调用方进程内持有共享 RPC 客户端，它可以运行在本机 Runner 或直接使用 SDK 的 Go 应用中。远端 Go Server 是独立部署的执行器，持有目标注册表和 Local Filesystem / Local Process。Pi / TypeScript 通过本机 stdio 调用 Runner；这里的 WS 由 Go SDK 建立。
 
-第一版建联方向为 Go SDK 初始化期间主动 Dial、Go Server 监听并 Accept。SDK 从宿主配置取得 endpoint 和初始 targetId 集合，完成拨号、Hello 和初始目标 GetInfo 才返回可用 Client；失败清理已获取资源并返回初始化错误。Server 提供 WS 入口和已注册目标，配置形式、具体地址与依赖库继续待定；`/remote/ws` 仅为入口示例。
+第一版建联方向为 Go SDK 初始化期间主动 Dial、Go Server 监听并 Accept。SDK 从宿主配置取得 endpoint 和初始 targetId 集合，完成拨号、Hello 和初始目标 GetInfo 才返回可用 Client；失败清理已获取资源并返回初始化错误。Server 已实现 WS 入口和目标注册，默认监听 127.0.0.1:9220，提供 listen / target / cwd / bash 参数，依赖已在 Go module 固定；完整部署配置和 TLS 终止仍待补充，`/remote/ws` 仅为入口示例。
 
 建联有两个阶段：
 

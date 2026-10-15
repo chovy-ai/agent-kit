@@ -2,6 +2,10 @@
 
 状态：首版代码已实现。Go SDK 提供 Environment、基本 Filesystem 和一次性 Bash Process；Remote 复用一条 WS / Protobuf 通道。Pi 工具通过 Effect 和本机 stdio 调用这些能力。当前运行验证在 macOS 完成；Windows 与 Linux 已验证交叉编译，仍需各自实机验证。
 
+## 配置本地环境
+
+推荐通过 [具名环境配置](configuration.md) 声明一个或多个 local 实例，名称直接用作 environmentId。文件相对路径以配置文件目录为基准。新配置当前只支持 local；下面的远端参数是保留的兼容入口，不能与新配置混用。
+
 ## 启动远端服务
 
 在仓库根目录构建并启动目标侧程序：
@@ -93,6 +97,8 @@ func main() {
 Client 是物理连接的所有者，Environment 借用它；先关闭环境再关闭 Client。关闭一个环境不影响同一 Client 上的其他环境，也不停止远端 Server。直接 SDK 应用可以用 Manager.Close 统一关闭注册环境；CLI 的环境与连接由 Wire provider 的 cleanup 统一管理，Runner 只借用 Directory。
 
 本地构造入口为 `environment/local.New(local.Config{Cwd: ...})`。文件与命令共享稳定目录；Process 每次启动独立 Bash，结束时回收管理范围内的后台子进程。平台执行细节见 [本地方案](../architecture/local-execution.md)。
+
+最近一次本地结果见 [验收记录](local-acceptance.md)，在线模型与离线替身结果分别记录。
 
 ## 定位实现与验证
 

@@ -105,7 +105,7 @@ OutputTruncated 表示有意限制保留或转发量；OutputIncomplete 表示�
 
 Finished 表示受本次 Exec 管理的进程生命周期已结束，不表示文件副作用已回滚。Signal 只在目标能够确认信号信息时填写；无退出码时使用 nil，避免将 0 误报为成功。Duration 是执行侧测得的耗时，断线后无法获得权威耗时时使用已确认的部分信息并返回错误。
 
-错误代码包括 INVALID_ARGUMENT、SHELL_UNAVAILABLE、START_FAILED、CANCELLED、DEADLINE_EXCEEDED、OUTPUT_FAILED、IO_ERROR、UNAVAILABLE、RESOURCE_EXHAUSTED、OUTCOME_UNKNOWN。Go 错误保留底层原因，取消与截止时间支持 errors.Is 判断；具体错误类型在源码实现时定义。
+错误代码包括 INVALID_ARGUMENT、SHELL_UNAVAILABLE、START_FAILED、CANCELLED、DEADLINE_EXCEEDED、OUTPUT_FAILED、IO_ERROR、UNAVAILABLE、RESOURCE_EXHAUSTED、OUTCOME_UNKNOWN。Go 错误保留底层原因，取消与截止时间支持 errors.Is 判断；具体错误类型见公开 environment.Error 与远端错误转换。
 
 任何命令执行错误都不自动重试，不改选环境。返回值与 error 可同时包含信息，调用方遇到错误仍应读取 Completion 和部分输出。
 

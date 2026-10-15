@@ -1,6 +1,6 @@
 # TypeScript 原型使用说明
 
-> 状态：历史原型，保留用于验证行为与参考测试。这里的 TypeScript 底层 SDK 不属于已确认的目标架构；目标底层 SDK 将用 Go 实现。正式框架已实现 Go Runner 和跨语言基础通信，Go 命令与文件 SDK 仍未实现；这里的旧原型不参与正式入口。
+> 状态：历史原型，保留用于验证行为与参考测试。这里的 TypeScript 底层 SDK 不属于已确认的目标架构；正式底层 SDK 已由 Go 实现。正式框架已实现 Go Runner、本地 / WS 远端文件与命令 SDK、TS 领域服务和 Pi 统一启动；这里的旧原型不参与正式入口。
 >
 > 正式架构以 [架构设计](../architecture/overview.md) 为准。本文命令均从 `prototypes/typescript/` 目录执行，下面的 API 和示例只对应现有 TypeScript 原型。
 

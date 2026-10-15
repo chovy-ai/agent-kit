@@ -5,8 +5,11 @@
 | 任务或主题 | 摘要与读取触发条件 | 首选说明 | 源码与验证入口 |
 | --- | --- | --- | --- |
 | 启动与当前能力 | 查看框架如何启动，核对已实现能力或原型状态 | [项目入口](../../README.md) | [main.ts](../../src/main.ts)、[bootstrap 测试](../../test/bootstrap.test.ts) |
-| 领域边界 | 新增能力、拆分职责或改变依赖与公开接口 | [规范入口](../architecture/standards.md)、[领域规范](../architecture/domain-boundaries.md) | 按新能力确定所属代码与测试，当前不预设模块 |
-| 上下文披露 | 修改指令、文档路由、检索、读取或摘要 | [披露规范](../architecture/context-disclosure.md) | [仓库指令](../../AGENTS.md)、本索引；运行时读取工具尚未实现 |
+| 领域边界 | 新增能力、拆分职责或改变依赖与公开接口 | [规范入口](../architecture/standards.md)、[领域规范](../architecture/domain-boundaries.md) | 当前模块与源码见模块依赖条目，新能力按职责新增 |
+| 上下文披露 | 修改指令、文档路由、检索、读取或摘要 | [披露规范](../architecture/context-disclosure.md) | [仓库指令](../../AGENTS.md)、本索引；已有文件读取，专用索引展开尚未实现 |
+| 具名环境配置 | 修改名称、配置文件、路径基准与 local 类型 | [配置指南](../development/configuration.md) | [公开定义](../../go/environment/config.go)、[解析](../../go/internal/runner/config.go)、[验收](../../test/configuration.test.ts)、[本地记录](../development/local-acceptance.md) |
+| 打包与交付 | 修改二进制矩阵、CLI、包内定位与安装验收 | [打包指南](../development/packaging.md) | [矩阵](../../packaging/targets.json)、[构建](../../scripts/build-go.mjs)、[包验收](../../scripts/verify-package.mjs) |
+| 运行时上下文设计 | 后续实现 ContextService、来源注册、索引和累计预算 | [设计方案](../architecture/context-runtime-plan.md) | 待实现，现有文件工具为兼容路径 |
 | 当前模块依赖 | 核对 Directory / Target / RuntimeClient 契约、具体实现装配与兼容入口 | [模块依赖与装配](../architecture/module-dependencies.md) | [Go 导入检查](../../go/internal/architecture/dependencies_test.go)、[TS 导入检查](../../test/architecture.test.ts)、[Server 替换测试](../../go/remote/target_test.go) |
 | TS 依赖与资源 | 修改模块服务、Layer、Scope、Pi 创建或桥接释放 | [TS 模块说明](../architecture/typescript-modules.md) | [启动装配](../../src/bootstrap/layers.ts)、[Bridge](../../src/modules/go-bridge/)、[模块测试](../../test/modules.test.ts) |
 | TS 能力模块 | 修改环境、文件、命令服务与对应 Pi 工具；领域服务通过公开契约交互 | [环境模块](../../src/modules/environment/README.md)、[文件模块](../../src/modules/filesystem/README.md)、[命令模块](../../src/modules/process/README.md) | [TS 模块测试](../../test/modules.test.ts)、[导入检查](../../test/architecture.test.ts) |

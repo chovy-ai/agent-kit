@@ -6,7 +6,9 @@ import (
 	"agent-kit/internal/runner"
 	"agent-kit/remote"
 	"context"
+	"fmt"
 	"log/slog"
+	"sort"
 	"sync"
 	"time"
 )
@@ -23,12 +25,39 @@ func cleanupEnvironment(target interface{ Close(context.Context) error }) func()
 	})
 }
 
-func provideLocalEnvironment(config runner.Config) (*local.Environment, func(), error) {
-	target, err := local.New(local.Config{Cwd: config.Cwd, Bash: config.Bash})
-	if err != nil {
+type localEnvironments map[string]*local.Environment
+
+func provideLocalEnvironments(config runner.Config) (localEnvironments, func(), error) {
+	definitions := config.Environments
+	if definitions == nil {
+		definitions = map[string]environment.Definition{"local": {Type: "local", Cwd: config.Cwd, Bash: config.Bash}}
+	} else if config.Cwd != "" || config.Bash != "" || config.RemoteEndpoint != "" {
+		return nil, nil, environment.Fail("INVALID_ARGUMENT", "named environments cannot be combined with legacy environment options", nil)
+	}
+	if err := environment.ValidateDefinitions(definitions); err != nil {
 		return nil, nil, err
 	}
-	return target, cleanupEnvironment(target), nil
+	targets := localEnvironments{}
+	cleanup := sync.OnceFunc(func() {
+		for _, target := range targets {
+			cleanupEnvironment(target)()
+		}
+	})
+	names := make([]string, 0, len(definitions))
+	for name := range definitions {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		definition := definitions[name]
+		target, err := local.New(local.Config{Cwd: definition.Cwd, Bash: definition.Bash})
+		if err != nil {
+			cleanup()
+			return nil, nil, fmt.Errorf("environment %q: %w", name, err)
+		}
+		targets[name] = target
+	}
+	return targets, cleanup, nil
 }
 
 // remoteBinding owns the optional connection and the environment borrowing it.
@@ -63,10 +92,12 @@ func provideRemoteBinding(config runner.Config) (*remoteBinding, func(), error) 
 	return &remoteBinding{target: target}, cleanup, nil
 }
 
-func provideEnvironmentManager(localTarget *local.Environment, bound *remoteBinding) (*environment.Manager, error) {
+func provideEnvironmentManager(localTargets localEnvironments, bound *remoteBinding) (*environment.Manager, error) {
 	manager := environment.NewManager()
-	if err := manager.Register("local", localTarget); err != nil {
-		return nil, err
+	for name, target := range localTargets {
+		if err := manager.Register(name, target); err != nil {
+			return nil, err
+		}
 	}
 	if bound.target != nil {
 		if err := manager.Register("remote", bound.target); err != nil {

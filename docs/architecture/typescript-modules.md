@@ -24,6 +24,8 @@ try {
 
 `sessionOptions` 透传 Pi 的模型、ResourceLoader、设置等配置；工具集合由应用装配决定。会话默认使用内存 SessionManager。远端 Server 仍由目标宿主管理，本机配置远端地址后连接它。
 
+具名环境可通过 runner.environments 或 runner.configPath 配置，当前只支持 local。规则见 [配置指南](../development/configuration.md)；包内 Runner 定位与交付见 [打包指南](../development/packaging.md)。
+
 ## 按职责找代码
 
 | 模块 | 公开契约与职责 | 实现位置 |

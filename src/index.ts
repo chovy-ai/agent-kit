@@ -2,7 +2,7 @@ export { createAgentKit, createPiAgent } from "./bootstrap/application.js";
 export type { PiAgentOptions } from "./bootstrap/application.js";
 export type { AgentKitLayers } from "./bootstrap/layers.js";
 export { RuntimeClient, RunnerConfig, RunnerError, PROTOCOL_VERSION } from "./modules/go-bridge/index.js";
-export type { ConnectionInfo, RuntimeClientService, RequestOptions, RunnerOptions, HelloResult, JsonObject, JsonValue, OutputEvent } from "./modules/go-bridge/index.js";
+export type { ConnectionInfo, RuntimeClientService, RequestOptions, RunnerOptions, LocalEnvironmentConfig, HelloResult, JsonObject, JsonValue, OutputEvent } from "./modules/go-bridge/index.js";
 export { RuntimeClientLive, createRuntimeClientLayer } from "./modules/go-bridge/live.js";
 export { EnvironmentService } from "./modules/environment/index.js";
 export type { EnvironmentRef, EnvironmentList, EnvironmentServiceApi } from "./modules/environment/index.js";

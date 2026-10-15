@@ -46,6 +46,32 @@ try {
 
 Go 未就绪时不创建 Pi 会话；会话创建失败会释放 Runner。分步嵌入可以使用 `createAgentKit()` 和 `app.createSession()`，会话与连接同属应用 Scope。
 
+## 按名称配置 local 环境
+
+```ts
+import { createAgentKit } from "agent-kit";
+
+const app = await createAgentKit({
+  environments: {
+    workspace: { type: "local", cwd: "." },
+    examples: { type: "local", cwd: "./examples" },
+  },
+});
+await app.close();
+```
+
+名称直接作为工具的 environmentId。配置当前只支持 local 类型；每个实例使用自己的默认目录，但共享宿主权限。文件形式可通过 `npm start -- --config ./examples/agent-kit.config.json` 启动，详细规则见 [具名环境配置](docs/development/configuration.md)。旧远端 SDK 和参数保留兼容，新配置不能与旧环境参数混用。
+
+## 打包交付
+
+```sh
+npm run pack:local
+npm run pack:release
+npm run verify:package
+```
+
+宿主包或多平台包输出到 `.build/packages/`，携带 JS、声明、CLI 和 Go 二进制。构建需要 Go，安装包运行不需要 Go 编译器；本轮不发布到 registry。安装、平台矩阵与验收见 [打包指南](docs/development/packaging.md)。
+
 ## 使用 Effect 服务
 
 以下代码在已经构建框架的项目中运行：
@@ -72,7 +98,7 @@ try {
 
 Go Runner 默认允许 32 个普通并发请求，可用 `--max-concurrent` 和 `--max-message-bytes` 配置。取消与关闭消息独立于普通并发额度。
 
-## 当前初始化目录
+## 当前目录
 
 ```text
 agent-kit/
@@ -122,13 +148,16 @@ npm run check
 - `npm run generate:wire`：使用 Go module 中固定版本的 Wire 工具生成初始化代码。
 - `npm test`：构建 Go Runner 并运行 TypeScript 测试。
 
-`wire_gen.go` 由工具生成，作为源文件保留，后续纳入 Git 提交；不手工编辑。普通构造函数和 Runner 不依赖 Wire 的运行时容器。
+`wire_gen.go` 由工具生成并已纳入版本控制，不手工编辑。普通构造函数和 Runner 不依赖 Wire 的运行时容器。
 
 ## 文档
 
 - [架构规范入口](docs/architecture/standards.md)：领域边界、依赖方向与变更验收。
 - [模块依赖与装配](docs/architecture/module-dependencies.md)：当前接口、Wire / Effect、兼容入口与依赖验证。
 - [TS 模块与统一启动](docs/architecture/typescript-modules.md)：五个模块、Pi / Go 生命周期、能力服务与替换 Layer。
+- [具名环境配置](docs/development/configuration.md)：配置文件、TS 对象、名称与兼容规则。
+- [打包指南](docs/development/packaging.md)：二进制矩阵、tarball、安装与本地验收。
+- [运行时上下文方案](docs/architecture/context-runtime-plan.md)：尚未实现的来源注册、索引与按需展开设计。
 - [执行环境使用与验证](docs/development/execution.md)：本地、远端、Pi 工具和 Go SDK。
 - [Agent 上下文索引](docs/context/index.md)：按任务定位相关说明、代码与测试。
 - [上下文渐进式披露](docs/architecture/context-disclosure.md)：常驻入口与按需读取规则。
@@ -139,7 +168,7 @@ npm run check
 - [远端传输决策与实施顺序](docs/architecture/remote-transport.md)
 - [远端 WebSocket 通道方案](protocol/remote-channel.md)
 - [Remote v1 消息与默认值](protocol/remote/v1/README.md)
-- [远端文件 RPC 草案](protocol/filesystem-rpc.md)
+- [远端文件 RPC 契约](protocol/filesystem-rpc.md)
 - [Process 接口方案](docs/architecture/process.md)
 - [Process RPC 与输出传输](protocol/process-rpc.md)
 - [已实现的框架通信协议](protocol/README.md)
