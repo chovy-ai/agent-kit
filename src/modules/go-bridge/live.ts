@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { fileURLToPath } from "node:url";
+import { runnerPath, runnerArgs } from "./runner.js";
 import { Effect, Layer } from "effect";
 import { asRunnerError, parseHello, parseResponse, PROTOCOL_VERSION, RunnerError } from "./protocol.js";
 import type { JsonObject } from "./protocol.js";
@@ -64,9 +64,7 @@ class StdioConnection {
     this.shutdownMs = positive(options.shutdownTimeoutMs, 2000, "shutdownTimeoutMs");
     this.messageLimit = positive(options.maxMessageBytes, 1024 * 1024, "maxMessageBytes");
     this.pendingLimit = positive(options.maxPendingRequests, 64, "maxPendingRequests");
-    const runnerPath = options.runnerPath ?? process.env.AGENT_KIT_RUNNER ?? fileURLToPath(new URL("../../../.build/runtime-runner", import.meta.url));
-    if (!runnerPath.trim() || runnerPath.includes("\0")) throw new RunnerError("INVALID_CONFIG", "runnerPath must be non-empty");
-    this.child = spawn(runnerPath, options.args ?? [], { stdio: ["pipe", "pipe", "pipe"] });
+    this.child = spawn(runnerPath(options), runnerArgs(options), { stdio: ["pipe", "pipe", "pipe"] });
     this.child.stdout.on("data", (chunk: Buffer) => this.read(chunk));
     this.child.stdout.on("error", (error) => this.fail(new RunnerError("CONNECTION_CLOSED", "Runner output failed", error)));
     this.child.stdin.on("error", (error) => this.fail(new RunnerError("CONNECTION_CLOSED", "Runner input failed", error)));

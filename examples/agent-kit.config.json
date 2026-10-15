@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "environments": {
+    "workspace": { "type": "local", "cwd": ".." },
+    "examples": { "type": "local", "cwd": "." }
+  }
+}

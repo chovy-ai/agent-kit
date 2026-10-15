@@ -11,7 +11,7 @@ import (
 )
 
 func InitializeRunner(config runner.Config, streams runner.Streams) (*runner.Server, func(), error) {
-	wire.Build(provideLogger, provideLocalEnvironment, provideRemoteBinding,
+	wire.Build(provideLogger, provideLocalEnvironments, provideRemoteBinding,
 		provideEnvironmentManager, wire.Bind(new(environment.Directory), new(*environment.Manager)),
 		runner.NewBusinessServer)
 	return nil, nil, nil

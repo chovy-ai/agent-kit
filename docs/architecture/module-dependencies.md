@@ -36,9 +36,9 @@ flowchart LR
 
 ## Go 的构造与所有权
 
-[Directory](../../go/environment/environment.go) 不暴露注册和 Close；Runner 只借用目录。Wire 将 Manager 绑定到 Directory，分别构造 Local、可选远端 binding、注册表与 Runner。`InitializeRunner` 返回 Server、cleanup 和 error；启动入口在 Serve 完成后调用 cleanup。初始化失败由 Wire 清理已构造的资源。
+[Directory](../../go/environment/environment.go) 不暴露注册和 Close；Runner 只借用目录。Wire 将 Manager 绑定到 Directory，构造具名 Local 集合、兼容模式下的可选远端 binding、注册表与 Runner。`InitializeRunner` 返回 Server、cleanup 和 error；启动入口在 Serve 完成后调用 cleanup。初始化失败由 Wire 清理已构造的资源。
 
-远端 binding 先关闭借用环境，再关闭自己拥有的 Client；Local 由其 provider 清理。直接使用 SDK 时也可以选择让 `Manager.Close` 统一关闭注册环境，Client 仍由连接所有者关闭。
+远端 binding 先关闭借用环境，再关闭自己拥有的 Client；具名 Local 集合由其 provider 清理；中途构造失败会关闭已创建的实例。直接使用 SDK 时也可以选择让 `Manager.Close` 统一关闭注册环境，Client 仍由连接所有者关闭。
 
 [Target](../../go/remote/target.go) 是远端 Server 所需的后端契约，使用领域类型，不含 Protobuf 或执行内核类型。Local 通过 `RunProcess` 转发通知；Server 无需导入 Local。下面是应用装配示例，成功后调用方通过 `Server.Close(ctx)` 清理服务及目标：
 

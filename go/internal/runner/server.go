@@ -18,6 +18,7 @@ type Config struct {
 	MaxMessageBytes                         int
 	MaxConcurrent                           int
 	Cwd, Bash, RemoteEndpoint, RemoteTarget string
+	Environments                            map[string]environment.Definition
 }
 
 func DefaultConfig() Config {

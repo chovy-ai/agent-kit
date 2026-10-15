@@ -4,20 +4,59 @@
   "private": true,
   "description": "Pi tools with Effect and a Wire-assembled Go SDK for local and WebSocket remote execution",
   "type": "module",
-  "engines": { "node": ">=22.19.0" },
+  "bin": {
+    "agent-kit": "./dist/main.js"
+  },
+  "files": [
+    "dist",
+    "binaries",
+    "examples"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chovy-ai/agent-kit.git"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./pi": { "types": "./dist/pi.d.ts", "import": "./dist/pi.js" },
-    "./go-bridge": { "types": "./dist/modules/go-bridge/index.d.ts", "import": "./dist/modules/go-bridge/index.js" },
-    "./environment": { "types": "./dist/modules/environment/index.d.ts", "import": "./dist/modules/environment/index.js" },
-    "./filesystem": { "types": "./dist/modules/filesystem/index.d.ts", "import": "./dist/modules/filesystem/index.js" },
-    "./process": { "types": "./dist/modules/process/index.d.ts", "import": "./dist/modules/process/index.js" },
-    "./agent": { "types": "./dist/modules/agent/index.d.ts", "import": "./dist/modules/agent/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./pi": {
+      "types": "./dist/pi.d.ts",
+      "import": "./dist/pi.js"
+    },
+    "./go-bridge": {
+      "types": "./dist/modules/go-bridge/index.d.ts",
+      "import": "./dist/modules/go-bridge/index.js"
+    },
+    "./environment": {
+      "types": "./dist/modules/environment/index.d.ts",
+      "import": "./dist/modules/environment/index.js"
+    },
+    "./filesystem": {
+      "types": "./dist/modules/filesystem/index.d.ts",
+      "import": "./dist/modules/filesystem/index.js"
+    },
+    "./process": {
+      "types": "./dist/modules/process/index.d.ts",
+      "import": "./dist/modules/process/index.js"
+    },
+    "./agent": {
+      "types": "./dist/modules/agent/index.d.ts",
+      "import": "./dist/modules/agent/index.js"
+    }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build:ts": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
-    "build:go": "mkdir -p .build && cd go && go build -o ../.build/runtime-runner ./cmd/runtime-runner && go build -o ../.build/remote-server ./cmd/remote-server",
+    "build:go": "node scripts/build-go.mjs",
+    "prepack": "npm run build:ts && node scripts/build-go.mjs --bundle",
+    "pack:local": "node scripts/pack.mjs",
+    "pack:release": "node scripts/pack.mjs --all",
+    "verify:package": "node scripts/verify-package.mjs",
     "build": "npm run build:ts && npm run build:go",
     "generate:wire": "cd go && go tool wire ./internal/di",
     "generate:protocol": "sh scripts/generate-protocol.sh",
@@ -26,12 +65,18 @@
     "check": "sh scripts/check.sh"
   },
   "dependencies": {
+    "@earendil-works/chord": "1.1.0",
+    "@earendil-works/pi-agent-core": "1.1.0",
+    "@earendil-works/pi-ai": "1.1.0",
+    "@earendil-works/pi-codemode": "1.1.0",
     "@earendil-works/pi-coding-agent": "1.1.0",
+    "@earendil-works/pi-mcp": "1.1.0",
+    "@earendil-works/pi-telemetry": "1.1.0",
+    "@earendil-works/pi-tui": "1.1.0",
     "effect": "4.0.3",
     "typebox": "1.3.27"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "1.1.0",
     "@types/node": "22.20.5",
     "tsx": "4.23.15",
     "typescript": "7.0.2"
